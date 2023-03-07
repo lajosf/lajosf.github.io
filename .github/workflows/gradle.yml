@@ -10,31 +10,35 @@ name: Java CI with Gradle
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
 
-permissions:
-  contents: read
+permissions: write-all
 
 jobs:
   build:
-
+    
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
+    environment: development
+    name: Automatic Build, Test, and QA
+    env:
+      PROJECT_NAME: ${{ github.event.repository.name }}
 
     steps:
+    
+    - name: Checkout repository
     - uses: actions/checkout@v3
-    - name: Set up JDK 11
+    
+    - name: Validate Gradle wrapper
+      uses: gradle/wrapper-validation-action@v1
+      
+    - name: Set up JDK 17
       uses: actions/setup-java@v3
       with:
-        java-version: '11'
+        java-version: '17'
         distribution: 'temurin'
-    - name: Build with Gradle
-      run: ./gradlew build  
-    - name: Deploy to GitHub Pages
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./build/docs/
-        cname: lajosf.github.io # Domain address for GitHub Pages
-        # html_file: src/main/resources/index.html # Optional: Include a specific source file on the HTML page
+    
+    - name: Setup gradle
+      uses: gradle/gradle-build-action@v2.3.3
+
+    - name: Execute Gradle build
+      run: ./gradlew clean build
