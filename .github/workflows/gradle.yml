@@ -14,13 +14,8 @@ on:
 permissions: write-all
 
 jobs:
-  build:
-    if: github.event.pull_request.merged == true
+  build-test:
     runs-on: ubuntu-latest
-    environment: development
-    name: Automatic Build, Test, and QA
-    env:
-      PROJECT_NAME: ${{ github.event.repository.name }}
     steps:
-    - name: Checkout repository
-    - uses: actions/checkout@v3
+      - name: Checkout repository
+      - uses: actions/checkout@v3
